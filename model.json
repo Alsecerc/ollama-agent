@@ -1,0 +1,68 @@
+{
+  "models": {
+    "small": {
+      "name": "gemma3:1b",
+      "description": "Lightweight model for quick responses and tool output processing",
+      "parameters": {
+        "temperature": 0.1,
+        "max_tokens": 500,
+        "timeout": 30
+      },
+      "use_cases": [
+        "tool_response_processing",
+        "quick_summaries",
+        "simple_tasks"
+      ]
+    },
+    "tiny": {
+      "name": "gemma3:270m",
+      "description": "Ultra-light model for very simple tasks and quick replies",
+      "parameters": {
+        "temperature": 0.1,
+        "max_tokens": 300,
+        "timeout": 15
+      },
+      "use_cases": [
+        "very_simple_tasks",
+        "short_replies",
+        "basic_formatting"
+      ]
+    },
+    "big": {
+      "name": "gemma3:12b",
+      "description": "Full-featured model for complex reasoning and decision making",
+      "parameters": {
+        "temperature": 0.1,
+        "max_tokens": 1000,
+        "timeout": 60
+      },
+      "use_cases": [
+        "complex_reasoning",
+        "tool_selection",
+        "multi_step_tasks",
+        "main_query_handling"
+      ]
+    }
+  },
+  "settings": {
+    "default_small_model": "gemma3:1b",
+    "default_big_model": "gemma3:12b",
+    "fallback_model": "gemma3:1b",
+    "auto_model_selection": true,
+    "model_health_check": true
+  },
+  "model_selection_rules": {
+    "use_small_for": [
+      "tool_output_processing",
+      "simple_summarization",
+      "formatting_responses",
+      "quick_queries"
+    ],
+    "use_big_for": [
+      "complex_reasoning",
+      "tool_selection_decisions",
+      "multi_step_planning",
+      "initial_query_analysis"
+    ]
+  }
+}
