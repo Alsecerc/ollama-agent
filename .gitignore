@@ -13,3 +13,7 @@ wheels/
 .env
 
 testing.py
+
+chroma_db/
+db/
+data/
