@@ -14,10 +14,11 @@ class MemoryManager:
     Handles loading, saving, and managing conversation history.
     """
     
-    def __init__(self, model_loader=None):
+    def __init__(self, model_loader=None) -> None:
         """Initialize the memory manager with default paths."""
         # Set up the data directory path for memory storage  
-        self.script_dir = Path(__file__).parent.parent.parent  # Go up to project root from src/ollama_agent/core/
+        # Get the project root directory (go up from src/ollama_agent/core/ to project root)
+        self.script_dir = Path(__file__).parent.parent.parent.parent  # Go up to project root
         self.data_dir = self.script_dir / "data"
         self.memory_file = self.data_dir / "memory.json"
         
@@ -42,6 +43,7 @@ class MemoryManager:
             if keep_system_prompt:
                 # Keep only system and token_count messages
                 new_history = []
+                message: dict
                 for message in history:
                     if message.get('role') in ['system', 'token_count']:
                         if message.get('role') == "token_count":
@@ -79,6 +81,7 @@ class MemoryManager:
                 return
             
             print(f"📚 Memory contains {len(history)} messages:")
+            message: dict
             for i, message in enumerate(history, 1):
                 role = message.get('role', 'unknown')
                 content = message.get('content', '')[:100]  # First 100 chars
