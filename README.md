@@ -3,10 +3,11 @@
 ⚠️ **Project Status: Active Development** ⚠️
 This project is currently under active development. While functional, some features may be incomplete or subject to change. Contributions and feedback are welcome!
 
-A sophisticated AI agent system that leverages the Model Context Protocol (MCP) and Ollama to provide intelligent responses and tool execution capabilities through a global command-line interface.
+A sophisticated AI agent system that leverages the Model Context Protocol (MCP) and Ollama to provide intelligent responses and tool execution capabilities through a global command-line interface. This is a local-first, privacy-preserving agent the runs all model inference runs on your machine via Ollama. By default, no prompts or conversation data are sent to external services. Network access is only used when you explicitly enable tools like Google Search. Memory is stored locally in `data/memory.json`, and the agent can operate offline for non-web tasks.
 
 ## 🚀 Features
 
+- **Local-first & privacy-preserving**: Runs models locally with Ollama; no cloud by default
 - **Global CLI Access**: Use `agent` command from anywhere on your system
 - **Intelligent Tool Selection**: AI automatically decides when to use tools vs. direct responses  
 - **Multi-Tool Integration**: Google search, CLI command execution, file system operations
@@ -428,7 +429,3 @@ This project is open source and available under the MIT License.
 - Use `agent -i` and type `help` for interactive assistance
 - Check the debug output when `printDebug = True`
 - Review the startup.bat output for system health status
-
----
-
-**Happy AI-powered productivity!** 🤖✨
