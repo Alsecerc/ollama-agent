@@ -27,7 +27,7 @@ class AIModel:
         self.max_history_length = max_history_length
         
         # Set up the data directory path for memory storage
-        self.script_dir = Path(__file__).parent.parent  # Go up one level from agent/ to project root
+        self.script_dir = Path(__file__).parent.parent.parent.parent  # Go up one level from agent/ to project root
         self.data_dir = self.script_dir / "data"
         self.memory_file = self.data_dir / "memory.json"
         
