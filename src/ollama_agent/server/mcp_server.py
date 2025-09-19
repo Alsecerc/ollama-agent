@@ -4,6 +4,7 @@ import subprocess
 import os
 import shlex
 import platform
+from .vector_db import VectorDB
 
 # Try to load dotenv, but don't fail if it's not available
 try:
@@ -235,6 +236,31 @@ def list_directory(path: str = ".", show_hidden: bool = False) -> str:
         return f"❌ Permission denied: Cannot access directory '{path}'"
     except Exception as e:
         return f"❌ Error listing directory '{path}': {str(e)}"
+
+@mcp.tool(description="Manage user memory using the vector database.")
+def get_memory(user_id: str, action: str, text: str) -> str:
+    """
+    Get memory of the user using vector database.
+    
+    Args:
+        user_id: The unique identifier for the user
+        action: "save" to store memory, "load" to retrieve memory.
+        text: The memory text to save (required if action="save") or query to search for memory.
+        
+    Returns:
+        A string representing the user's memory
+    """
+    if action not in ["save", "load"]:
+        return "❌ Invalid action. Use 'save' or 'load'."
+    
+    db = VectorDB(persist_dir=f"./user_memory_db/{user_id}")
+
+    if action == "save":
+        db.add([text])
+        return f"Memory for user {user_id} has been saved."
+    else:  # action == "load"
+        memory = db.query(text=text)
+        return f"Memory for user {user_id}: {memory["documents"]}"
 
 # Start the MCP server
 if __name__ == "__main__":
