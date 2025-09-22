@@ -7,12 +7,10 @@ including both production and development CLI entry points.
 
 # Import main CLI functions to make them available at package level
 from .main import main
-from .dev import main as dev_main
 
 # Define what gets imported when someone does "from ollama_agent.cli import *"
 __all__ = [
     "main",
-    "dev_main",
 ]
 
 # CLI module metadata
