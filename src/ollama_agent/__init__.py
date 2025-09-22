@@ -8,7 +8,7 @@ command-line interface.
 
 __version__ = "0.1.0"
 __author__ = "Chen"
-__email__ = "your.email@example.com"
+__email__ = "cty889977@gmail.com"
 __description__ = "Intelligent Agent CLI - AI-powered command-line assistant with MCP integration"
 
 # Make key classes available at package level

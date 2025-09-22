@@ -3,12 +3,14 @@ from .ai_model_lib import AIModel
 import json
 import os
 import dotenv
+from rich.console import Console
+from rich.markdown import Markdown
 
 dotenv.load_dotenv()
 
 class IntelligentAgent:
     printDebug:bool = os.getenv("DEBUG", "false").lower() == "true"  # Enable debug mode for detailed output
-
+    console = Console()
     def __init__(self, Big_model=None, Small_model=None, config_path=None, avaliable_functions=[], list_of_tools=None) -> None:
         # Load model configuration from JSON file
         self.model_config = self._load_model_config(config_path)
@@ -33,7 +35,8 @@ class IntelligentAgent:
             message: The message to print
         """
         if isdebug:
-            print(f"🔍 **Debug:** {message}")
+            markdown = Markdown(f"**Debug:** {message}")
+            IntelligentAgent.console.print(markdown)
 
     def _load_model_config(self, config_path=None) -> dict:
         """Load model configuration from JSON file"""
@@ -103,30 +106,30 @@ class IntelligentAgent:
                 )
                 aimodel_response = aimodel.chat(user_query)
 
-                self.print_debug(self.printDebug, f"💬 **AI Model Response:**\n\n{aimodel_response}")
+                self.print_debug(self.printDebug, f"**AI Model Response:**\n\n{aimodel_response}")
                 
                 # The response from chat() is already a parsed dictionary, not a JSON string
                 if isinstance(aimodel_response, dict):
                     # Extract the actual content from the response
                     actual_content = aimodel_response.get('message', {}).get('content', '')
-                    self.print_debug(self.printDebug, f"🔍 **Debug - Extracted Content:** {actual_content}")
+                    self.print_debug(self.printDebug, f"**Debug - Extracted Content:** {actual_content}")
                     
                     # Check for native function calls first
                     calltools = aimodel_response.get('message', {}).get('tool_calls', [])
                     
                     if calltools:
                         for tool in calltools:
-                            self.print_debug(self.printDebug, f"🔧 **Available Tool:** {tool}")
+                            self.print_debug(self.printDebug, f"**Available Tool:** {tool}")
                             tools_result = await self.handle_tool_call(tool['function']['name'], tool['function']['arguments'], mcp_session)
                         
-                        self.print_debug(self.printDebug, f"🔧 **Tool Call Result:** {tools_result}")
-                        return f"🔍 **Tool Call Result:**\n\n{tools_result}"
+                        self.print_debug(self.printDebug, f"**Tool Call Result:** {tools_result}")
+                        return f"**Tool Call Result:**\n\n{tools_result}"
                 else:
                     # If it's a string, try to parse it
                     try:
                         response_data = json.loads(aimodel_response)
                         actual_content = response_data.get('message', {}).get('content', aimodel_response)
-                        self.print_debug(self.printDebug, f"🔍 **Debug - Extracted Content:** {actual_content}")
+                        self.print_debug(self.printDebug, f"**Debug - Extracted Content:** {actual_content}")
                     except json.JSONDecodeError:
                         actual_content = aimodel_response
                 
@@ -135,17 +138,16 @@ class IntelligentAgent:
                 
                 if extracted_json[0] is not None:  # Check if tool_name is not None
                     tool_name, args = extracted_json
-                    print(f"**Executing Tool:** {tool_name} with args: {args}")
+                    self.print_debug(self.printDebug, f"Executing Tool: {tool_name} with args: {args}")
                     tool_result = await self.handle_tool_call(tool_name, args, mcp_session)
 
-                    self.print_debug(self.printDebug, f"🔧 **Tool Call Result before processed:**\n\n{tool_result}")
-
                     # Process the tool result with the small model for better formatting
-                    tool_result = self.small_model_handle_tool_response(tool_result, model=self.Small_model, userprompt=user_query)
-                    return f"🔍 **Tool Call Result:**\n\n{tool_result}"
+                    tool_result = aimodel.chat(tool_result, isCallTool=True)
+                    self.print_debug(self.printDebug, f"**Tool Call Result before processed:**\n\n{tool_result}")
+                    return f"**Tool Call Result:**\n\n{tool_result}"
                 else:
                     # Return the direct AI response if no tool call is needed
-                    return f"💭 **Direct Response:**\n\n{actual_content}"
+                    return f"**Direct Response:**\n\n{actual_content}"
             else:
                 # ...existing code for fallback path...
                 aimodel = AIModel(
@@ -187,12 +189,12 @@ class IntelligentAgent:
                 # Handle the response based on its type
                 if isinstance(aimodel_response, dict):
                     actual_content = aimodel_response.get('message', {}).get('content', '')
-                    self.print_debug(self.printDebug, f"🔍 **Debug - Extracted Content:** {actual_content}")
+                    self.print_debug(self.printDebug, f"**Debug - Extracted Content:** {actual_content}")
                 else:
                     try:
                         response_data = json.loads(aimodel_response)
                         actual_content = response_data.get('message', {}).get('content', aimodel_response)
-                        self.print_debug(self.printDebug, f"🔍 **Debug - Extracted Content:** {actual_content}")
+                        self.print_debug(self.printDebug, f"**Debug - Extracted Content:** {actual_content}")
                     except json.JSONDecodeError:
                         actual_content = aimodel_response
                 
@@ -203,17 +205,17 @@ class IntelligentAgent:
                     print(f"**Executing Tool:** {tool_name} with args: {args}")
                     tool_result = await self.handle_tool_call(tool_name, args, mcp_session)
 
-                    self.print_debug(self.printDebug, f"🔧 **Tool Call Result before processed:**\n\n{tool_result}")
-
+                    self.print_debug(self.printDebug, f"**Tool Call Result before processed:**\n\n{tool_result}")
                     # Process the tool result with the small model for better formatting
-                    tool_result = self.small_model_handle_tool_response(tool_result, model=self.Small_model, userprompt=user_query)
-                    return f"🔍 **Tool Call Result:**\n\n{tool_result}"
+                    tool_result = aimodel.chat(tool_result, isCallTool=True)
+                    self.print_debug(self.printDebug, f"**Tool Call Result before processed:**\n\n{tool_result}")
+                    return f"**Tool Call Result:**\n\n{tool_result}"
                 else:
                     # Return the direct AI response if no tool call is needed
-                    return f"💭 **Direct Response:**\n\n{actual_content}"
+                    return f"**Direct Response:**\n\n{actual_content}"
             
         except Exception as e:
-            return f"❌ **Error processing query:** {str(e)}"
+            return f"**Error processing query:** {str(e)}"
     
     def small_model_handle_tool_response(self, tool_response: str, model: str = "", userprompt: str = "") -> str:
         """
@@ -231,7 +233,7 @@ class IntelligentAgent:
             return "No model specified for processing tool response."
 
         processed_prompt = tool_response + f"\n\n User Prompt: {userprompt}"
-        self.print_debug(isdebug=self.printDebug, message=f"🔍 **Debug - Processed Prompt for Small Model:** {processed_prompt}")
+        self.print_debug(isdebug=self.printDebug, message=f"**Debug - Processed Prompt for Small Model:** {processed_prompt}")
         aimodel = AIModel(
             model_name=model,
             temperature=self.small_model_params.get('temperature', 0.1),
@@ -265,7 +267,7 @@ class IntelligentAgent:
         """
         import re
         
-        self.print_debug(isdebug=self.printDebug, message=f"🔍 **Debug - Input text:** {text}")
+        self.print_debug(isdebug=self.printDebug, message=f"**Debug - Input text:** {text}")
         
         # First, try to find JSON directly in the text (without code blocks)
         # Look for JSON-like structure starting with { and ending with }
@@ -274,13 +276,13 @@ class IntelligentAgent:
         
         if json_match:
             json_text = json_match.group(0).strip()
-            self.print_debug(isdebug=self.printDebug, message=f"🔍 **Debug - Found JSON with regex:** {json_text}")
+            self.print_debug(isdebug=self.printDebug, message=f"**Debug - Found JSON with regex:** {json_text}")
         else:
             # Try to extract JSON from markdown code blocks
             json_match = re.search(r'```(?:json)?\s*\n?(.*?)\n?```', text, re.DOTALL)
             if (json_match):
                 json_text = json_match.group(1).strip()
-                self.print_debug(isdebug=self.printDebug, message=f"🔍 **Debug - Found JSON in code block:** {json_text}")
+                self.print_debug(isdebug=self.printDebug, message=f"**Debug - Found JSON in code block:** {json_text}")
             else:
                 # Try a more flexible approach - look for any content that starts with { and contains tool_name
                 flexible_pattern = r'\{[^}]*"tool_name"[^}]*\}'
@@ -288,7 +290,7 @@ class IntelligentAgent:
                 
                 if flexible_match:
                     json_text = flexible_match.group(0).strip()
-                    self.print_debug(isdebug=self.printDebug, message=f"🔍 **Debug - Found JSON with flexible pattern:** {json_text}")
+                    self.print_debug(isdebug=self.printDebug, message=f"**Debug - Found JSON with flexible pattern:** {json_text}")
                 else:
                     # Check if this looks like it's intended to contain JSON
                     has_json_markers = (
@@ -297,22 +299,22 @@ class IntelligentAgent:
                         ('{' in text and '"tool_name"' in text)
                     )
                     
-                    self.print_debug(isdebug=self.printDebug, message=f"🔍 **Debug - Has JSON markers:** {has_json_markers}")
+                    self.print_debug(isdebug=self.printDebug, message=f"**Debug - Has JSON markers:** {has_json_markers}")
                     
                     if not has_json_markers:
                         # This is likely a plain text response, not intended as JSON
-                        self.print_debug(isdebug=self.printDebug, message="🔍 **Debug - No JSON markers found, treating as plain text**")
+                        self.print_debug(isdebug=self.printDebug, message="**Debug - No JSON markers found, treating as plain text**")
                         return None, {}
                     else:
                         # No JSON structure found despite markers
-                        self.print_debug(isdebug=self.printDebug, message="🔍 **Debug - JSON markers found but no valid JSON structure**")
+                        self.print_debug(isdebug=self.printDebug, message="**Debug - JSON markers found but no valid JSON structure**")
                         return None, {}
         
         # Clean up common JSON formatting issues
         json_text = re.sub(r',\s*}', '}', json_text)  # Remove trailing commas before closing braces
         json_text = re.sub(r',\s*]', ']', json_text)  # Remove trailing commas before closing brackets
         
-        self.print_debug(isdebug=self.printDebug, message=f"🔍 **Debug - Cleaned JSON text:** {json_text}")
+        self.print_debug(isdebug=self.printDebug, message=f"**Debug - Cleaned JSON text:** {json_text}")
         
         try:
             # Parse the JSON string
@@ -322,8 +324,8 @@ class IntelligentAgent:
             tool_name = extracted_json.get("tool_name")
             args = extracted_json.get("args", {})
             
-            self.print_debug(isdebug=self.printDebug, message=f"🔍 **Debug - Extracted tool_name:** {tool_name}")
-            self.print_debug(isdebug=self.printDebug, message=f"🔍 **Debug - Extracted args:** {args}")
+            self.print_debug(isdebug=self.printDebug, message=f"**Debug - Extracted tool_name:** {tool_name}")
+            self.print_debug(isdebug=self.printDebug, message=f"**Debug - Extracted args:** {args}")
             
             return tool_name, args
         except json.JSONDecodeError as e:
@@ -342,8 +344,8 @@ class IntelligentAgent:
                     if query_match:
                         args["query"] = query_match.group(1)
                     
-                    self.print_debug(isdebug=self.printDebug, message=f"🔍 **Debug - Fallback extraction - tool_name:** {tool_name}")
-                    self.print_debug(isdebug=self.printDebug, message=f"🔍 **Debug - Fallback extraction - args:** {args}")
+                    self.print_debug(isdebug=self.printDebug, message=f"**Debug - Fallback extraction - tool_name:** {tool_name}")
+                    self.print_debug(isdebug=self.printDebug, message=f"**Debug - Fallback extraction - args:** {args}")
                     
                     return tool_name, args
             except Exception as fallback_error:
@@ -424,4 +426,4 @@ class IntelligentAgent:
             if result_str not in ["[]", "No results", ""]:
                 return result_str
         
-        return "🚫 No relevant results from tool call."
+        return "No relevant results from tool call."

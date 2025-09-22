@@ -49,12 +49,15 @@ class AIModel:
         # Fix: Use 'response' key instead of 'message'['content']
         return response['response']
     
-    def chat(self, message: str) -> str:
+    def chat(self, message: str, isCallTool: bool = False) -> str:
         """
         Generate a chat response based on the provided messages and available functions.
         """
         if not message:
             raise ValueError("Messages string cannot be empty.")
+
+        if isCallTool:
+            self.history[-1] = {'role': 'assistant', 'content': message}
 
         # Load latest memory state
         self.load_memory()
@@ -69,8 +72,6 @@ class AIModel:
         
         # Use the full history for the chat
         messages = self.history.copy()
-
-        
 
         response = self.client.chat(
             model=self.model_name,
@@ -102,7 +103,7 @@ class AIModel:
             
             # Check if history exceeds max length and truncate if needed
             if self.size_of_memory() > self.max_history_length:
-                self.history = self.history[-self.max_history_length:]
+                self.history = [self.history[0]] + self.history[-(self.max_history_length-1):]
             
             # Save updated history to memory
             with open(self.memory_file, 'w') as f:

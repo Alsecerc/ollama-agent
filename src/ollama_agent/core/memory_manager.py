@@ -4,7 +4,7 @@ Memory Management Utility
 Provides easy access to memory operations without creating a full AI model instance
 """
 
-from ollama_agent.core.model_loader import ModelConfigLoader
+from .model_loader import ModelConfigLoader
 from pathlib import Path
 import json
 

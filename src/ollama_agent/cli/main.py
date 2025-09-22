@@ -1,15 +1,19 @@
-from ollama_agent.core.agent import IntelligentAgent
+from ollama_agent import IntelligentAgent
+
 import asyncio
 from mcp.client.stdio import stdio_client
 from mcp import ClientSession, StdioServerParameters
 import os
 import sys
 import argparse
-from ollama_agent.core.model_loader import ModelConfigLoader
-from ollama_agent.core.memory_manager import MemoryManager
+from ollama_agent import ModelConfigLoader
+from ollama_agent import MemoryManager
 import difflib
 import json
 import traceback
+import ollama_agent
+from rich.console import Console
+from rich.markdown import Markdown
 
 try:
     import dotenv
@@ -17,11 +21,13 @@ try:
 except ImportError:
     pass
 
+console = Console()
 isDebug:bool = IntelligentAgent.printDebug
 # Create a single instance and reuse it
 loader = ModelConfigLoader()
 loadtinymodel = loader.get_model_name("tiny")  # Use the existing instance
-manager = MemoryManager(model_loader=loader)  # Pass the existing loader instance
+manager = MemoryManager()
+# loader already created above
 EXIT_COMMANDS = ['quit', 'exit', 'q', 'bye', 'goodbye']
 HELP_COMMANDS = ['help', '?']
 
@@ -64,9 +70,9 @@ async def run_intelligent_agent(userquery) -> str:
     """
     
     # Get absolute path to server and use the virtual environment Python
-    # Updated paths for new structure
-    server_path = os.path.join(os.path.dirname(__file__), "..", "server", "mcp_server.py")
-    python_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", ".venv", "Scripts", "python.exe")
+    package_dir = os.path.dirname(ollama_agent.__file__)
+    server_path = os.path.join(package_dir, "server", "mcp_server.py")
+    python_path = sys.executable  # Use current Python interpreter
     params = StdioServerParameters(command=python_path, args=[server_path])
     
     try:
@@ -276,7 +282,7 @@ def parse_arguments() -> argparse.Namespace:
 
 async def interactive_mode() -> None:
     """Run the agent in interactive mode."""
-    print("🤖 Intelligent Agent CLI - Interactive Mode")
+    print("Intelligent Agent CLI - Interactive Mode")
     print("Type '/bye', '/exit', '/quit' to exit")
     print("Type '/help' for usage information")
     print("Type '/memory <command>' for memory management")
@@ -284,28 +290,32 @@ async def interactive_mode() -> None:
     
     while True:
         try:
-            query = input("\n💭 Enter your query: ").strip()
+            query = input("\nEnter your query: ").strip()
             
             if not query:
-                print("💡 Please enter a query or type '/help'.")
+                print("Please enter a query or type '/help'.")
                 continue
 
             if dispatch_command(query):
                 continue
 
-            print(f"🔄 Processing: {query}")
+            # Process regular queries through the intelligent agent
+            print(f"Processing: {query}")
             result = await run_intelligent_agent(query)
-            print(f"\n💬 **Agent Response:**\n\n{result}")
-
+            if result:
+                markdown = Markdown(result)
+                console.print(markdown)
+            else:
+                print("No response from agent.")
+                
         except KeyboardInterrupt:
-
-            print("\n\n👋 Interrupted. Goodbye!")
+            print("\n\nInterrupted. Goodbye!")
             return
         except EOFError:
-            print("\n👋 Goodbye!")
+            print("\nGoodbye!")
             return
         except Exception as e:
-            print(f"\n❌ Unexpected error: {e}")
+            print(f"\nUnexpected error: {e}")
             print("Type '/bye' to exit or continue with another query.")
 
 def main() -> None:
@@ -327,12 +337,17 @@ def main() -> None:
         asyncio.run(interactive_mode())
     elif query:
         # Run single query
-        print(f"🔄 Processing: {query}")
+        print(f"Processing: {query}")
         result = asyncio.run(run_intelligent_agent(query))
-        print(f"\n💬 **Agent Response:**\n\n{result}")
+        if result:
+            markdown = Markdown(result)
+            console.print(markdown)
+        else:
+            print("No response from agent.")
+
     else:
         # No query provided, show help
-        print("❌ No query provided. Use -h for help or -i for interactive mode.")
+        print("No query provided. Use -h for help or -i for interactive mode.")
         print("\nQuick start:")
         print('  python testing.py "Your query here"')
         print('  python testing.py -i  # Interactive mode')
