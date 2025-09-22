@@ -1,17 +1,14 @@
-from ollama_agent import IntelligentAgent
-
+from ollama_agent import IntelligentAgent, MemoryManager, ModelConfigLoader
 import asyncio
+import ollama_agent
 from mcp.client.stdio import stdio_client
 from mcp import ClientSession, StdioServerParameters
 import os
 import sys
 import argparse
-from ollama_agent import ModelConfigLoader
-from ollama_agent import MemoryManager
 import difflib
 import json
 import traceback
-import ollama_agent
 from rich.console import Console
 from rich.markdown import Markdown
 
@@ -334,7 +331,10 @@ def main() -> None:
     
     if args.interactive:
         # Run in interactive mode
-        asyncio.run(interactive_mode())
+        try:
+            asyncio.run(interactive_mode())
+        except KeyboardInterrupt:
+            return
     elif query:
         # Run single query
         print(f"Processing: {query}")
