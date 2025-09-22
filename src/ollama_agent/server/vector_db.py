@@ -3,6 +3,7 @@ import hashlib
 from sentence_transformers import SentenceTransformer
 from dotenv import load_dotenv
 import os
+
 load_dotenv()
 
 class VectorDB:
