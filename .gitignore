@@ -12,8 +12,8 @@ wheels/
 # Configuration files
 .env
 
-testing.py
-
 chroma_db/
 db/
 data/
+tests/
+examples/
