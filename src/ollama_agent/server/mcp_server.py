@@ -2,9 +2,8 @@ from mcp.server.fastmcp import FastMCP
 import requests
 import subprocess
 import os
-import shlex
 import platform
-from ollama_agent.server.vector_db import VectorDB
+from .vector_db import VectorDB
 
 # Try to load dotenv, but don't fail if it's not available
 try:
@@ -264,4 +263,4 @@ def get_memory(user_id: str, action: str, text: str) -> str:
 
 # Start the MCP server
 if __name__ == "__main__":
-    mcp.run(transport="stdio")
+    mcp.run()
