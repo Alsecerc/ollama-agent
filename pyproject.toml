@@ -6,10 +6,10 @@ readme = "README.md"
 requires-python = ">=3.13"
 license = {text = "MIT"}
 authors = [
-    {name = "Chen", email = "your.email@example.com"}
+    {name = "Chen", email = "cty889977@gmail.com"}
 ]
 maintainers = [
-    {name = "Chen", email = "your.email@example.com"}
+    {name = "Chen", email = "cty889977@gmail.com"}
 ]
 keywords = ["ai", "agent", "cli", "ollama", "mcp", "assistant", "automation"]
 classifiers = [
@@ -34,11 +34,11 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/ollamaAgent"
-Repository = "https://github.com/yourusername/ollamaAgent"
-Documentation = "https://github.com/yourusername/ollamaAgent#readme"
-"Bug Reports" = "https://github.com/yourusername/ollamaAgent/issues"
-Changelog = "https://github.com/yourusername/ollamaAgent/releases"
+Homepage = "https://github.com/Alsecerc/ollamaAgent"
+Repository = "https://github.com/Alsecerc/ollamaAgent"
+Documentation = "https://github.com/Alsecerc/ollamaAgent#readme"
+"Bug Reports" = "https://github.com/Alsecerc/ollamaAgent/issues"
+Changelog = "https://github.com/Alsecerc/ollamaAgent/releases"
 
 [project.scripts]
 agent = "ollama_agent.cli.main:main"
