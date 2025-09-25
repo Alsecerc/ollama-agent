@@ -3,7 +3,7 @@ import requests
 import subprocess
 import os
 import platform
-from .vector_db import VectorDB
+from ollama_agent.server.vector_db import VectorDB
 
 # Try to load dotenv, but don't fail if it's not available
 try:
